@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f4efe5" />
+    <title>Commonplace</title>
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" href="./icons/icon-192.png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <button id="topbar-back-button" class="back-link topbar-back-button" type="button" hidden>←</button>
+        <h1 id="app-title">Commonplace</h1>
+        <div class="topbar-actions">
+          <button id="load-data-button" class="secondary-button" type="button">読込</button>
+          <button id="save-data-button" class="secondary-button" type="button">保存</button>
+          <button id="create-book-top-button" class="secondary-button" type="button">追加</button>
+          <button id="open-search-button" class="secondary-button" type="button">検索</button>
+          <button id="topbar-create-entry-button" class="secondary-button icon-button" type="button" hidden aria-label="メモを追加">+</button>
+        </div>
+      </header>
+
+      <main id="app" class="app-main"></main>
+    </div>
+
+    <template id="library-template">
+      <section class="screen">
+        <form id="library-search-form" class="panel controls-panel">
+          <label class="field">
+            <span>本をさがす</span>
+            <input id="library-search-input" type="search" placeholder="タイトル・著者等" />
+          </label>
+
+          <label class="field field-compact">
+            <span class="field-label-row">
+              <span>並び替え</span>
+              <button id="library-sort-direction-button" class="sort-direction-button sort-direction-button-inline" type="button" aria-label="並び順を切り替え">↓</button>
+            </span>
+            <div class="sort-control">
+              <select id="library-sort-select">
+                <option value="updated">更新日</option>
+                <option value="title">タイトル</option>
+                <option value="created">追加日</option>
+              </select>
+            </div>
+          </label>
+        </form>
+
+        <div id="library-grid" class="library-grid"></div>
+      </section>
+    </template>
+
+    <template id="book-template">
+      <section class="screen">
+        <div class="panel book-subbar">
+          <div class="field book-search-field">
+            <span>この本を検索</span>
+            <form id="book-subbar-search-form" class="book-subbar-search">
+              <input id="book-subbar-search-input" type="search" aria-label="この本を検索" placeholder="見出し・引用・メモなど" />
+            </form>
+          </div>
+          <span id="book-subbar-updated" class="book-subbar-updated"></span>
+        </div>
+        <div id="book-entry-list" class="entry-list"></div>
+      </section>
+    </template>
+
+    <template id="search-template">
+      <section class="screen">
+        <button id="search-back-button" class="back-link" type="button">← 戻る</button>
+
+        <div class="screen-header">
+          <div>
+            <h2>検索</h2>
+          </div>
+        </div>
+
+        <form id="global-search-form" class="panel controls-panel controls-panel-single">
+          <label class="field">
+            <span>キーワード</span>
+            <input id="global-search-input" type="search" placeholder="本のタイトル・著者・見出し・引用・メモ・タグ・位置情報" />
+          </label>
+        </form>
+
+        <div id="search-results" class="search-results"></div>
+      </section>
+    </template>
+
+    <dialog id="book-dialog" class="dialog">
+      <form id="book-form" class="dialog-form" method="dialog">
+        <div class="dialog-header">
+          <h3 id="book-dialog-title">新しい本</h3>
+        </div>
+
+        <label class="field">
+          <span>タイトル *</span>
+          <input name="title" type="text" required maxlength="200" />
+        </label>
+
+        <label class="field">
+          <span>著者</span>
+          <input name="author" type="text" maxlength="120" />
+        </label>
+
+        <label class="field">
+          <span>表紙画像パス</span>
+          <input name="cover_image" type="text" placeholder="任意" />
+        </label>
+
+        <label class="field">
+          <span>表紙画像アップロード</span>
+          <input name="cover_file" type="file" accept="image/*" />
+        </label>
+
+        <div class="cover-preview-block">
+          <span class="field-label">プレビュー</span>
+          <div id="book-cover-preview" class="book-cover-preview"></div>
+        </div>
+
+        <div class="form-actions">
+          <button class="ghost-button" type="button" id="clear-book-cover-button">表紙をクリア</button>
+          <button class="secondary-button" type="button" id="cancel-book-button">キャンセル</button>
+          <button class="primary-button" type="submit" id="submit-book-button">保存</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="entry-dialog" class="dialog">
+      <form id="entry-form" class="dialog-form entry-dialog-form">
+        <div class="dialog-header">
+          <h3 id="entry-dialog-title">編集</h3>
+          <p id="entry-book-label" class="muted-text entry-book-label"></p>
+        </div>
+
+        <label class="field">
+          <span>見出し *</span>
+          <input name="core" type="text" required maxlength="140" placeholder="短い見出し" />
+        </label>
+
+        <label class="field">
+          <span>引用・抜粋</span>
+          <textarea name="context_quote" rows="6" placeholder="引用やAI要約を貼り付け"></textarea>
+        </label>
+
+        <label class="field">
+          <span>要約</span>
+          <textarea name="context_summary" rows="4" placeholder="客観要約"></textarea>
+        </label>
+
+        <label class="field">
+          <span>メモ・考え</span>
+          <textarea name="context_note" rows="5" placeholder="主観、感想、問いの芽"></textarea>
+        </label>
+
+        <label class="field">
+          <span>タグ</span>
+          <input name="tags" type="text" placeholder="カンマ区切りで入力" />
+        </label>
+
+        <label class="field">
+          <span>位置情報</span>
+          <input name="locator" type="text" placeholder="章名 / location / 自由記述" />
+        </label>
+
+        <label class="field">
+          <span>関連リンク</span>
+          <input name="context_link" type="text" placeholder="関連メモやURL" />
+        </label>
+
+        <div class="form-actions">
+          <button id="cancel-entry-button" class="secondary-button" type="button">閉じる</button>
+          <button id="delete-entry-button" class="danger-button" type="button">削除</button>
+          <button class="primary-button" type="submit">保存</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="delete-entry-dialog" class="dialog">
+      <form id="delete-entry-form" class="dialog-form confirm-dialog-form" method="dialog">
+        <div class="dialog-header">
+          <h3>このメモを削除しますか</h3>
+        </div>
+        <p id="delete-entry-summary" class="muted-text confirm-copy"></p>
+        <div class="form-actions">
+          <button id="cancel-delete-entry-button" class="secondary-button" type="button">キャンセル</button>
+          <button id="confirm-delete-entry-button" class="danger-button" type="submit">削除</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script type="module" src="./src/app.js"></script>
+  </body>
+</html>
