@@ -93,6 +93,11 @@ function wireGlobalEvents() {
       return;
     }
 
+    if (state.route.screen === "search") {
+      backToFallback({ screen: "library" });
+      return;
+    }
+
     navigateTo({ screen: "library" });
   });
   topbarCreateEntryButton.addEventListener("click", async () => {
@@ -254,17 +259,18 @@ function backToFallback(fallback) {
 function render() {
   const isLibrary = state.route.screen === "library";
   const isBook = state.route.screen === "book" || state.route.screen === "entry";
+  const isSearch = state.route.screen === "search";
   document.body.dataset.screen = isBook ? "book" : state.route.screen;
 
   loadDataButton.hidden = !supportsFileSystemAccess;
   saveDataButton.hidden = !supportsFileSystemAccess;
   openSearchButton.hidden = state.route.screen === "search" || isBook;
   createBookTopButton.hidden = !isLibrary;
-  topbarBackButton.hidden = !isBook;
+  topbarBackButton.hidden = !(isBook || isSearch);
   topbarCreateEntryButton.hidden = !isBook;
-  loadDataButton.hidden = !supportsFileSystemAccess || isBook;
-  saveDataButton.hidden = !supportsFileSystemAccess || isBook;
-  topbarActions.hidden = false;
+  loadDataButton.hidden = !supportsFileSystemAccess || isBook || isSearch;
+  saveDataButton.hidden = !supportsFileSystemAccess || isBook || isSearch;
+  topbarActions.hidden = isSearch;
   appTitle.hidden = false;
   appTitle.textContent = isLibrary ? "Commonplace" : isBook ? "" : "検索";
 
@@ -412,7 +418,10 @@ function renderBookScreen(bookId, entryId = null) {
         const preview = createPreview(entry.context_quote || entry.context_summary || entry.context_note);
         const tagsMarkup = (entry.tags || [])
           .slice(0, 4)
-          .map((tag) => `<span class="tag-pill">${escapeHtml(tag)}</span>`)
+          .map(
+            (tag) =>
+              `<button class="tag-pill tag-pill-button" type="button" data-tag-query="${escapeHtml(tag)}">${escapeHtml(tag)}</button>`
+          )
           .join("");
         return `
           <article class="entry-card">
@@ -428,6 +437,15 @@ function renderBookScreen(bookId, entryId = null) {
 
     list.querySelectorAll("[data-entry-id]").forEach((button) => {
       button.addEventListener("click", () => navigateTo({ screen: "entry", bookId: book.id, entryId: button.dataset.entryId }));
+    });
+    list.querySelectorAll("[data-tag-query]").forEach((button) => {
+      button.addEventListener("click", (event) => {
+        event.stopPropagation();
+        const query = button.dataset.tagQuery || "";
+        state.globalSearchDraft = query;
+        state.globalSearch = query;
+        navigateTo({ screen: "search" });
+      });
     });
   }
 
@@ -556,7 +574,6 @@ function closeDeleteEntryDialog() {
 
 function renderSearchScreen() {
   const fragment = cloneTemplate("search-template");
-  const backButton = fragment.querySelector("#search-back-button");
   const searchForm = fragment.querySelector("#global-search-form");
   const input = fragment.querySelector("#global-search-input");
   const results = fragment.querySelector("#search-results");
@@ -572,8 +589,6 @@ function renderSearchScreen() {
     state.globalSearch = state.globalSearchDraft;
     renderWithPreservedInput("global-search-input", state.globalSearchDraft);
   });
-
-  backButton.addEventListener("click", () => backToFallback({ screen: "library" }));
 
   const matches = state.globalSearch
     ? state.entries.filter((entry) => {

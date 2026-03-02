@@ -248,17 +248,21 @@ textarea {
 }
 
 .topbar-back-button {
-  font-size: 1.15rem;
+  font-size: 1.5rem;
   line-height: 1;
   padding-right: 6px;
+  color: var(--text);
 }
 
 .icon-button {
-  min-width: 38px;
+  min-width: auto;
   padding-inline: 0;
   text-align: center;
-  font-size: 1.1rem;
+  font-size: 1.6rem;
   line-height: 1;
+  background: transparent;
+  border: none;
+  color: var(--text);
 }
 
 .topbar-actions[hidden] {
@@ -282,6 +286,28 @@ body[data-screen="book"] .topbar h1 {
 body[data-screen="book"] .topbar-actions {
   justify-content: flex-end;
   flex-wrap: nowrap;
+}
+
+body[data-screen="search"] .topbar {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) 32px;
+  align-items: center;
+  gap: 12px;
+}
+
+body[data-screen="search"] .topbar::after {
+  content: "";
+  width: 32px;
+  height: 1px;
+}
+
+body[data-screen="search"] .topbar h1 {
+  text-align: center;
+  white-space: nowrap;
+}
+
+body[data-screen="search"] .topbar-actions {
+  display: none;
 }
 
 .entry-book-label {
@@ -311,8 +337,10 @@ body[data-screen="book"] .topbar-actions {
   font-size: 0.88rem;
 }
 
-#global-search-form {
-  max-width: 760px;
+#global-search-form,
+.search-panel {
+  width: 100%;
+  max-width: none;
 }
 
 .book-subbar {
@@ -320,7 +348,6 @@ body[data-screen="book"] .topbar-actions {
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 18px;
-  padding-right: 18px;
 }
 
 .book-search-field {
@@ -488,6 +515,11 @@ body[data-screen="book"] .topbar-actions {
   font-size: 0.78rem;
 }
 
+.tag-pill-button {
+  border: none;
+  cursor: pointer;
+}
+
 .entry-list,
 .search-results {
   display: grid;
@@ -498,6 +530,10 @@ body[data-screen="book"] .topbar-actions {
 .search-card {
   display: grid;
   gap: 10px;
+}
+
+.search-card {
+  background: var(--panel-strong);
 }
 
 .entry-card-button,
@@ -814,6 +850,7 @@ body[data-screen="book"] .topbar-actions {
 
   body[data-screen="book"] .topbar-back-button {
     padding-right: 4px;
+    font-size: 1.38rem;
   }
 
   body[data-screen="book"] .topbar {
@@ -821,10 +858,27 @@ body[data-screen="book"] .topbar-actions {
     gap: 10px;
   }
 
+  body[data-screen="search"] .topbar {
+    grid-template-columns: 28px minmax(0, 1fr) 28px;
+    gap: 10px;
+  }
+
+  body[data-screen="search"] .topbar::after {
+    width: 28px;
+  }
+
+  body[data-screen="search"] .topbar h1 {
+    font-size: 1.18rem;
+  }
+
+  body[data-screen="search"] .topbar-back-button,
+  body[data-screen="book"] .icon-button {
+    font-size: 1.42rem;
+  }
+
   body[data-screen="book"] .book-subbar {
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 14px;
-    padding-right: 14px;
     align-items: center;
   }
 
