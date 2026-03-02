@@ -350,7 +350,7 @@ function renderLibraryScreen() {
               ${coverMarkup}
               <div class="library-card-body">
                 <strong class="library-card-title">${escapeHtml(book.title)}</strong>
-                <span class="muted-text">${escapeHtml(book.author || "著者未設定")}</span>
+                <span class="muted-text library-card-author">${escapeHtml(book.author || "著者未設定")}</span>
               </div>
             </button>
           </article>
