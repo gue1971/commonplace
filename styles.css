@@ -258,11 +258,20 @@ textarea {
   min-width: auto;
   padding-inline: 0;
   text-align: center;
-  font-size: 1.6rem;
   line-height: 1;
   background: transparent;
   border: none;
   color: var(--text);
+}
+
+.icon-glyph {
+  width: 28px;
+  height: 28px;
+  display: block;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  fill: none;
 }
 
 .topbar-actions[hidden] {
@@ -286,6 +295,11 @@ body[data-screen="book"] .topbar h1 {
 body[data-screen="book"] .topbar-actions {
   justify-content: flex-end;
   flex-wrap: nowrap;
+}
+
+body[data-screen="book"] .topbar-actions .icon-button {
+  padding: 0;
+  min-width: 28px;
 }
 
 body[data-screen="search"] .topbar {
@@ -874,6 +888,16 @@ body[data-screen="search"] .topbar-actions {
   body[data-screen="search"] .topbar-back-button,
   body[data-screen="book"] .icon-button {
     font-size: 1.42rem;
+  }
+
+  body[data-screen="book"] .topbar-actions .icon-button {
+    padding: 0;
+    min-width: 26px;
+  }
+
+  body[data-screen="book"] .icon-glyph {
+    width: 26px;
+    height: 26px;
   }
 
   body[data-screen="book"] .book-subbar {
