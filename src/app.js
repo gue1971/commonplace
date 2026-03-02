@@ -266,7 +266,7 @@ function render() {
   saveDataButton.hidden = !supportsFileSystemAccess || isBook;
   topbarActions.hidden = false;
   appTitle.hidden = false;
-  appTitle.textContent = isLibrary ? "本棚" : isBook ? "" : "検索";
+  appTitle.textContent = isLibrary ? "Commonplace" : isBook ? "" : "検索";
 
   if (isBook) {
     const book = state.books.find((item) => item.id === state.route.bookId);
