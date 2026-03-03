@@ -7,6 +7,7 @@ const state = {
   librarySearchDraft: "",
   librarySort: "updated",
   librarySortDirection: "desc",
+  libraryView: "grid",
   bookSearch: "",
   bookSearchDraft: "",
   globalSearch: "",
@@ -18,6 +19,7 @@ const appNode = document.querySelector("#app");
 const appTitle = document.querySelector("#app-title");
 const topbarBackButton = document.querySelector("#topbar-back-button");
 const topbarActions = document.querySelector(".topbar-actions");
+const toggleLibraryViewButton = document.querySelector("#toggle-library-view-button");
 const loadDataButton = document.querySelector("#load-data-button");
 const saveDataButton = document.querySelector("#save-data-button");
 const createBookTopButton = document.querySelector("#create-book-top-button");
@@ -76,6 +78,10 @@ function wireGlobalEvents() {
     render();
   });
 
+  toggleLibraryViewButton.addEventListener("click", () => {
+    state.libraryView = state.libraryView === "grid" ? "list" : "grid";
+    renderLibraryScreen();
+  });
   loadDataButton.addEventListener("click", () => importFileInput.click());
   importFileInput.addEventListener("change", importDataFile);
   saveDataButton.addEventListener("click", exportDataFile);
@@ -258,6 +264,7 @@ function render() {
 
   openSearchButton.hidden = state.route.screen === "search" || isBook;
   createBookTopButton.hidden = !isLibrary;
+  toggleLibraryViewButton.hidden = !isLibrary;
   topbarBackButton.hidden = !(isBook || isSearch);
   topbarCreateEntryButton.hidden = !isBook;
   loadDataButton.hidden = isBook || isSearch;
@@ -298,6 +305,8 @@ function renderLibraryScreen() {
   const sortSelect = fragment.querySelector("#library-sort-select");
   const sortDirectionButton = fragment.querySelector("#library-sort-direction-button");
   const grid = fragment.querySelector("#library-grid");
+  const gridIcon = toggleLibraryViewButton.querySelector(".icon-glyph-grid");
+  const listIcon = toggleLibraryViewButton.querySelector(".icon-glyph-list");
 
   searchInput.value = state.librarySearchDraft;
   sortSelect.value = state.librarySort;
@@ -306,6 +315,12 @@ function renderLibraryScreen() {
     "aria-label",
     state.librarySortDirection === "desc" ? "降順で表示中。昇順に切り替え" : "昇順で表示中。降順に切り替え"
   );
+  toggleLibraryViewButton.setAttribute(
+    "aria-label",
+    state.libraryView === "grid" ? "リスト表示に切り替え" : "カード表示に切り替え"
+  );
+  gridIcon.hidden = state.libraryView !== "grid";
+  listIcon.hidden = state.libraryView !== "list";
   enableSelectAllOnFocus(searchInput);
 
   searchInput.addEventListener("input", (event) => {
@@ -333,13 +348,32 @@ function renderLibraryScreen() {
     state.librarySort,
     state.librarySortDirection
   );
+  grid.className = state.libraryView === "list" ? "library-list" : "library-grid";
 
   if (!books.length) {
     grid.innerHTML = `<div class="empty-state">本が見つかりません。まずは1冊作成してください。</div>`;
   } else {
     const bookMarkup = books
       .map((book) => {
-        const coverMarkup = renderBookCoverMarkup(book, "cover-art");
+        const coverMarkup = renderBookCoverMarkup(
+          book,
+          state.libraryView === "list" ? "cover-art library-list-cover-art" : "cover-art"
+        );
+
+        if (state.libraryView === "list") {
+          return `
+            <article class="library-list-item" data-book-id="${book.id}">
+              <button class="library-card-button library-list-button" type="button" data-book-id="${book.id}">
+                <div class="library-list-cover">${coverMarkup}</div>
+                <div class="library-list-body">
+                  <strong class="library-card-title library-list-title">${escapeHtml(book.title)}</strong>
+                  <span class="muted-text library-card-author library-list-author">${escapeHtml(book.author || "著者未設定")}</span>
+                </div>
+              </button>
+              <button class="library-card-edit library-list-edit" type="button" data-edit-book-id="${book.id}" aria-label="本を編集">✎</button>
+            </article>
+          `;
+        }
 
         return `
           <article class="library-card" data-book-id="${book.id}">
