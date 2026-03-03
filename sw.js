@@ -1,4 +1,4 @@
-const CACHE_NAME = "commonplace-v4";
+const CACHE_NAME = "commonplace-v5";
 const ASSETS = [
   "./",
   "./index.html",

@@ -601,33 +601,6 @@ body[data-screen="search"] .topbar-actions {
   min-height: 118px;
 }
 
-.library-card-edit {
-  position: absolute;
-  right: 10px;
-  bottom: 10px;
-  z-index: 2;
-  width: auto;
-  height: auto;
-  display: block;
-  background: transparent;
-  border: none;
-  color: rgba(36, 27, 18, 0.46);
-  font-size: 0.82rem;
-  box-shadow: none;
-  backdrop-filter: none;
-}
-
-.library-list-edit {
-  right: 10px;
-  top: 10px;
-  bottom: auto;
-}
-
-.library-card-edit:hover {
-  background: transparent;
-  color: rgba(36, 27, 18, 0.68);
-}
-
 .library-card-title {
   font-family: var(--font-body);
   font-size: 1rem;
@@ -751,10 +724,6 @@ body[data-screen="search"] .topbar-actions {
   gap: 10px;
 }
 
-.entry-card {
-  position: relative;
-}
-
 .search-card {
   background: var(--panel-strong);
 }
@@ -768,27 +737,6 @@ body[data-screen="search"] .topbar-actions {
   display: grid;
   gap: 10px;
   width: 100%;
-}
-
-.entry-card-button {
-  padding-right: 24px;
-}
-
-.entry-card-edit {
-  position: absolute;
-  top: 0;
-  right: 0;
-  z-index: 2;
-  background: transparent;
-  border: none;
-  color: rgba(36, 27, 18, 0.46);
-  font-size: 0.82rem;
-  line-height: 1;
-  padding: 0;
-}
-
-.entry-card-edit:hover {
-  color: rgba(36, 27, 18, 0.68);
 }
 
 .entry-tag-row {
@@ -1219,12 +1167,6 @@ body[data-screen="search"] .topbar-actions {
     font-size: 0.74rem;
   }
 
-  body[data-screen="library"] .library-card-edit {
-    right: 8px;
-    bottom: 8px;
-    font-size: 0.74rem;
-  }
-
   body[data-screen="library"] .library-list-cover {
     width: 84px;
     min-width: 84px;
@@ -1246,13 +1188,6 @@ body[data-screen="search"] .topbar-actions {
 
   body[data-screen="library"] .library-list-author {
     font-size: 0.76rem;
-  }
-
-  body[data-screen="library"] .library-list-edit {
-    right: 8px;
-    top: 8px;
-    bottom: auto;
-    font-size: 0.74rem;
   }
 
   body[data-screen="library"] .sort-control {

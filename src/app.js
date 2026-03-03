@@ -525,7 +525,6 @@ function renderBookScreen(bookId, entryId = null) {
               <div class="entry-core">${escapeHtml(entry.core || "無題のメモ")}</div>
               <div class="quote-preview">${escapeHtml(preview || "引用または要約を追加するとここに表示されます")}</div>
             </button>
-            <button class="entry-card-edit" type="button" data-edit-entry-id="${entry.id}" aria-label="メモを編集">✎</button>
             ${tagsMarkup ? `<div class="tag-row entry-tag-row">${tagsMarkup}</div>` : ""}
           </article>
         `;
@@ -534,12 +533,6 @@ function renderBookScreen(bookId, entryId = null) {
 
     list.querySelectorAll("[data-entry-id]").forEach((button) => {
       button.addEventListener("click", () => navigateTo({ screen: "entry", bookId: book.id, entryId: button.dataset.entryId }));
-    });
-    list.querySelectorAll("[data-edit-entry-id]").forEach((button) => {
-      button.addEventListener("click", (event) => {
-        event.stopPropagation();
-        openEntryDialog(book.id, button.dataset.editEntryId, { returnToView: false });
-      });
     });
     list.querySelectorAll("[data-tag-query]").forEach((button) => {
       button.addEventListener("click", (event) => {
