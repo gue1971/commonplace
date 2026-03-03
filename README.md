@@ -14,9 +14,10 @@ python3 -m http.server 8125
 
 ## 保存方式
 
-- 初期表示では `data/books.json` と `data/entries.json` を読み込みます
-- 編集内容をローカル JSON へ永続化するには、Chromium 系ブラウザで `データ保存先を接続` を押し、保存先フォルダを選択します
-- 選択先フォルダに `books.json` / `entries.json` がなければ自動作成します
+- 初期表示では `data/commonplace.json` を読み込みます
+- 保存形式は 1 ファイルで、スキーマは `schema_version + books + entries` です
+- `インポート` で既存の JSON を読み込みます
+- `エクスポート` で現在の状態を `cmp_YYYY-MM-DD-HH-mm.json` 形式の名前でダウンロードします
 
 ## MVP 範囲
 
@@ -28,5 +29,4 @@ python3 -m http.server 8125
 
 ## 注意
 
-- Safari / Firefox では閲覧はできますが、File System Access API による JSON 永続化は使えません
-- 保存時は一時ファイルを書いた後に本体を書き換える流れで、破損リスクを下げています
+- JSON の読込形式は `schema_version + books + entries` の 1 ファイル構成です

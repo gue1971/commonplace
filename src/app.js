@@ -11,12 +11,9 @@ const state = {
   bookSearchDraft: "",
   globalSearch: "",
   globalSearchDraft: "",
-  dataHandle: null,
 };
 
-const HANDLE_DB_NAME = "commonplace-fs";
-const HANDLE_STORE_NAME = "handles";
-const HANDLE_KEY = "data-directory";
+const DATA_SCHEMA_VERSION = 1;
 const appNode = document.querySelector("#app");
 const appTitle = document.querySelector("#app-title");
 const topbarBackButton = document.querySelector("#topbar-back-button");
@@ -26,6 +23,7 @@ const saveDataButton = document.querySelector("#save-data-button");
 const createBookTopButton = document.querySelector("#create-book-top-button");
 const openSearchButton = document.querySelector("#open-search-button");
 const topbarCreateEntryButton = document.querySelector("#topbar-create-entry-button");
+const importFileInput = document.querySelector("#import-file-input");
 const bookDialog = document.querySelector("#book-dialog");
 const bookForm = document.querySelector("#book-form");
 const cancelBookButton = document.querySelector("#cancel-book-button");
@@ -43,7 +41,6 @@ const deleteEntryDialog = document.querySelector("#delete-entry-dialog");
 const deleteEntryForm = document.querySelector("#delete-entry-form");
 const deleteEntrySummary = document.querySelector("#delete-entry-summary");
 const cancelDeleteEntryButton = document.querySelector("#cancel-delete-entry-button");
-const supportsFileSystemAccess = "showDirectoryPicker" in window;
 const bookDialogState = {
   mode: "create",
   bookId: null,
@@ -61,16 +58,12 @@ boot().catch((error) => {
 });
 
 async function boot() {
-  state.books = await loadBundledJson("./data/books.json");
-  state.entries = await loadBundledJson("./data/entries.json");
+  const bundledData = await loadBundledJson("./data/commonplace.json");
+  hydrateStateFromPayload(bundledData);
 
   wireGlobalEvents();
   syncRouteFromHash();
   render();
-
-  if (supportsFileSystemAccess) {
-    restoreDirectoryHandle().then(() => render());
-  }
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("./sw.js").catch((error) => console.warn("SW registration failed", error));
@@ -83,8 +76,9 @@ function wireGlobalEvents() {
     render();
   });
 
-  loadDataButton.addEventListener("click", loadDataDirectory);
-  saveDataButton.addEventListener("click", saveDataDirectory);
+  loadDataButton.addEventListener("click", () => importFileInput.click());
+  importFileInput.addEventListener("change", importDataFile);
+  saveDataButton.addEventListener("click", exportDataFile);
   createBookTopButton.addEventListener("click", () => openBookDialog());
   openSearchButton.addEventListener("click", () => navigateTo({ screen: "search" }));
   topbarBackButton.addEventListener("click", () => {
@@ -262,14 +256,12 @@ function render() {
   const isSearch = state.route.screen === "search";
   document.body.dataset.screen = isBook ? "book" : state.route.screen;
 
-  loadDataButton.hidden = !supportsFileSystemAccess;
-  saveDataButton.hidden = !supportsFileSystemAccess;
   openSearchButton.hidden = state.route.screen === "search" || isBook;
   createBookTopButton.hidden = !isLibrary;
   topbarBackButton.hidden = !(isBook || isSearch);
   topbarCreateEntryButton.hidden = !isBook;
-  loadDataButton.hidden = !supportsFileSystemAccess || isBook || isSearch;
-  saveDataButton.hidden = !supportsFileSystemAccess || isBook || isSearch;
+  loadDataButton.hidden = isBook || isSearch;
+  saveDataButton.hidden = isBook || isSearch;
   topbarActions.hidden = isSearch;
   appTitle.hidden = false;
   appTitle.textContent = isLibrary ? "Commonplace" : isBook ? "" : "検索";
@@ -726,123 +718,68 @@ async function loadBundledJson(path) {
   return response.json();
 }
 
-async function restoreDirectoryHandle() {
-  const handle = await loadPersistedDirectoryHandle();
-  if (!handle) {
-    return;
-  }
-
-  try {
-    const permission = await handle.queryPermission({ mode: "readwrite" });
-    if (permission !== "granted") {
-      return;
-    }
-
-    await hydrateStateFromDirectory(handle);
-    state.dataHandle = handle;
-  } catch (error) {
-    console.warn("Directory handle restore skipped", error);
-  }
-}
-
-async function pickDataDirectory() {
-  if (!supportsFileSystemAccess) {
-    return null;
-  }
-
-  try {
-    const handle = await window.showDirectoryPicker({ mode: "readwrite" });
-    state.dataHandle = handle;
-    await persistDirectoryHandle(handle);
-    return handle;
-  } catch (error) {
-    if (error.name !== "AbortError") {
-      console.error(error);
-    }
-    return null;
-  }
-}
-
-async function loadDataDirectory() {
-  const handle = await pickDataDirectory();
-  if (!handle) {
-    return;
-  }
-
-  try {
-    await ensureDataFiles(handle);
-    await hydrateStateFromDirectory(handle);
-    render();
-  } catch (error) {
-    console.error(error);
-  }
-}
-
-async function saveDataDirectory() {
-  let handle = state.dataHandle;
-  if (!handle) {
-    handle = await pickDataDirectory();
-  }
-
-  if (!handle) {
-    return;
-  }
-
-  try {
-    await ensureDataFiles(handle);
-    await writeJsonAtomic(handle, "books.json", state.books);
-    await writeJsonAtomic(handle, "entries.json", state.entries);
-    render();
-  } catch (error) {
-    console.error(error);
-  }
-}
-
 async function persistState() {
-  if (!state.dataHandle) {
-    render();
+  render();
+}
+
+function createPersistedPayload() {
+  return {
+    schema_version: DATA_SCHEMA_VERSION,
+    books: state.books,
+    entries: state.entries,
+  };
+}
+
+function hydrateStateFromPayload(payload) {
+  state.books = Array.isArray(payload?.books) ? payload.books : [];
+  state.entries = Array.isArray(payload?.entries) ? payload.entries : [];
+}
+
+async function importDataFile(event) {
+  const file = event.target.files?.[0];
+  if (!file) {
     return;
   }
 
   try {
-    await writeJsonAtomic(state.dataHandle, "books.json", state.books);
-    await writeJsonAtomic(state.dataHandle, "entries.json", state.entries);
+    const payload = JSON.parse(await file.text());
+    hydrateStateFromPayload(payload);
+    state.librarySearch = "";
+    state.librarySearchDraft = "";
+    state.bookSearch = "";
+    state.bookSearchDraft = "";
+    state.globalSearch = "";
+    state.globalSearchDraft = "";
+    navigateTo({ screen: "library" });
   } catch (error) {
     console.error(error);
   } finally {
-    render();
+    importFileInput.value = "";
   }
 }
 
-async function ensureDataFiles(handle) {
-  await writeJsonIfMissing(handle, "books.json", state.books);
-  await writeJsonIfMissing(handle, "entries.json", state.entries);
+function exportDataFile() {
+  const payload = JSON.stringify(createPersistedPayload(), null, 2);
+  const blob = new Blob([payload], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = createExportFilename();
+  document.body.append(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
 }
 
-async function writeJsonIfMissing(handle, filename, fallbackData) {
-  try {
-    await handle.getFileHandle(filename, { create: false });
-  } catch {
-    const fileHandle = await handle.getFileHandle(filename, { create: true });
-    const writable = await fileHandle.createWritable();
-    await writable.write(JSON.stringify(fallbackData, null, 2));
-    await writable.close();
-  }
+function createExportFilename() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+  return `cmp_${year}-${month}-${day}-${hours}-${minutes}.json`;
 }
-
-async function hydrateStateFromDirectory(handle) {
-  const books = await readJsonFromHandle(handle, "books.json");
-  const entries = await readJsonFromHandle(handle, "entries.json");
-  state.books = Array.isArray(books) ? books : [];
-  state.entries = Array.isArray(entries) ? entries : [];
-}
-
-async function readJsonFromHandle(handle, filename) {
-  const fileHandle = await handle.getFileHandle(filename, { create: false });
-  const file = await fileHandle.getFile();
-  return JSON.parse(await file.text());
-}
-
 
 function resolveBookCoverValue({ uploadedCover, typedCover, existingCover, clearCover }) {
   if (uploadedCover) {
@@ -862,24 +799,6 @@ function resolveBookCoverValue({ uploadedCover, typedCover, existingCover, clear
 
 function getEditableCoverValue(coverValue) {
   return coverValue.startsWith("data:image/") ? "" : coverValue;
-}
-
-async function writeJsonAtomic(handle, filename, payload) {
-  const tempHandle = await handle.getFileHandle(`${filename}.tmp`, { create: true });
-  const tempWriter = await tempHandle.createWritable();
-  await tempWriter.write(JSON.stringify(payload, null, 2));
-  await tempWriter.close();
-
-  const fileHandle = await handle.getFileHandle(filename, { create: true });
-  const writer = await fileHandle.createWritable();
-  await writer.write(JSON.stringify(payload, null, 2));
-  await writer.close();
-
-  try {
-    await handle.removeEntry(`${filename}.tmp`);
-  } catch (error) {
-    console.warn("Failed to remove temp file", error);
-  }
 }
 
 function filterBooks(books, entries, query) {
@@ -1086,33 +1005,5 @@ function readFileAsDataUrl(file) {
     reader.onload = () => resolve(reader.result);
     reader.onerror = () => reject(reader.error);
     reader.readAsDataURL(file);
-  });
-}
-
-async function persistDirectoryHandle(handle) {
-  const db = await openHandleDatabase();
-  await promisifyRequest(db.transaction(HANDLE_STORE_NAME, "readwrite").objectStore(HANDLE_STORE_NAME).put(handle, HANDLE_KEY));
-}
-
-async function loadPersistedDirectoryHandle() {
-  const db = await openHandleDatabase();
-  return promisifyRequest(db.transaction(HANDLE_STORE_NAME, "readonly").objectStore(HANDLE_STORE_NAME).get(HANDLE_KEY));
-}
-
-function openHandleDatabase() {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(HANDLE_DB_NAME, 1);
-    request.onupgradeneeded = () => {
-      request.result.createObjectStore(HANDLE_STORE_NAME);
-    };
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-  });
-}
-
-function promisifyRequest(request) {
-  return new Promise((resolve, reject) => {
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
   });
 }

@@ -21,6 +21,10 @@
   box-sizing: border-box;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 body {
   margin: 0;
   min-height: 100vh;
@@ -248,10 +252,12 @@ textarea {
 }
 
 .topbar-back-button {
-  font-size: 1.5rem;
   line-height: 1;
   padding-right: 6px;
   color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .icon-button {
@@ -262,20 +268,60 @@ textarea {
   background: transparent;
   border: none;
   color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toolbar-icon-button {
+  min-width: 36px;
+  width: 36px;
+  height: 36px;
+  padding: 0;
 }
 
 .icon-glyph {
   width: 28px;
   height: 28px;
   display: block;
-  stroke: currentColor;
-  stroke-width: 2.4;
-  stroke-linecap: round;
-  fill: none;
+  overflow: visible;
+}
+
+.toolbar-icon-button .icon-glyph {
+  width: 28px;
+  height: 28px;
+}
+
+.icon-glyph-back {
+  width: 30px;
+  height: 30px;
 }
 
 .topbar-actions[hidden] {
   display: none;
+}
+
+body[data-screen="library"] .topbar-back-button {
+  display: none !important;
+}
+
+body[data-screen="library"] .topbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+}
+
+body[data-screen="library"] .topbar h1 {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body[data-screen="library"] .topbar-actions {
+  justify-content: flex-end;
+  flex-wrap: nowrap;
 }
 
 body[data-screen="book"] .topbar {
@@ -784,6 +830,14 @@ body[data-screen="search"] .topbar-actions {
     flex-wrap: nowrap;
   }
 
+  body[data-screen="library"] .topbar h1 {
+    font-size: 1.18rem;
+  }
+
+  body[data-screen="library"] .topbar-actions {
+    gap: 4px;
+  }
+
   body[data-screen="library"] .topbar-actions .secondary-button,
   body[data-screen="book"] .topbar-actions .secondary-button,
   body[data-screen="library"] .screen-header-actions .secondary-button,
@@ -792,6 +846,23 @@ body[data-screen="search"] .topbar-actions {
   body[data-screen="book"] .screen-header-actions .primary-button {
     padding: 8px 10px;
     font-size: 0.76rem;
+  }
+
+  body[data-screen="library"] .topbar-actions .secondary-button {
+    padding: 7px 8px;
+    font-size: 0.7rem;
+  }
+
+  body[data-screen="library"] .topbar-actions .toolbar-icon-button {
+    min-width: 34px;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+  }
+
+  body[data-screen="library"] .toolbar-icon-button .icon-glyph {
+    width: 26px;
+    height: 26px;
   }
 
   body[data-screen="library"] h1,
@@ -864,7 +935,6 @@ body[data-screen="search"] .topbar-actions {
 
   body[data-screen="book"] .topbar-back-button {
     padding-right: 4px;
-    font-size: 1.38rem;
   }
 
   body[data-screen="book"] .topbar {
@@ -887,12 +957,18 @@ body[data-screen="search"] .topbar-actions {
 
   body[data-screen="search"] .topbar-back-button,
   body[data-screen="book"] .icon-button {
-    font-size: 1.42rem;
+    font-size: inherit;
   }
 
   body[data-screen="book"] .topbar-actions .icon-button {
     padding: 0;
     min-width: 26px;
+  }
+
+  body[data-screen="book"] .icon-glyph-back,
+  body[data-screen="search"] .icon-glyph-back {
+    width: 28px;
+    height: 28px;
   }
 
   body[data-screen="book"] .icon-glyph {

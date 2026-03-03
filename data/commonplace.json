@@ -1,0 +1,183 @@
+{
+  "schema_version": 1,
+  "books": [
+    {
+      "id": "book_20260302_0001",
+      "title": "サピエンス全史",
+      "author": "ユヴァル・ノア・ハラリ",
+      "cover_image": "https://m.media-amazon.com/images/I/81Rs5NLXipL._SL1500_.jpg",
+      "created_at": "2026-03-02T10:00:00+09:00",
+      "updated_at": "2026-03-02T10:05:00+09:00"
+    },
+    {
+      "id": "book_20260302_0005",
+      "title": "ZERO to ONE",
+      "author": "Peter Thiel",
+      "cover_image": "https://m.media-amazon.com/images/I/71jHLe0jLtL._SL1500_.jpg",
+      "created_at": "2026-02-28T19:45:00+09:00",
+      "updated_at": "2026-03-01T23:12:00+09:00"
+    },
+    {
+      "id": "book_20260302_0007",
+      "title": "人を動かす",
+      "author": "D・カーネギー",
+      "cover_image": "https://m.media-amazon.com/images/I/A1-vwHdEVUL._SL1500_.jpg",
+      "created_at": "2026-03-02T11:12:00+09:00",
+      "updated_at": "2026-03-02T11:18:00+09:00"
+    },
+    {
+      "id": "book_20260302_0008",
+      "title": "ファスト＆スロー 上",
+      "author": "ダニエル・カーネマン",
+      "cover_image": "https://m.media-amazon.com/images/I/41IqC6GZA7L.jpg",
+      "created_at": "2026-03-02T11:30:00+09:00",
+      "updated_at": "2026-03-02T11:30:00+09:00"
+    },
+    {
+      "id": "book_20260302_0009",
+      "title": "ファスト＆スロー 下",
+      "author": "ダニエル・カーネマン",
+      "cover_image": "https://m.media-amazon.com/images/I/41mtGIMNwaL.jpg",
+      "created_at": "2026-03-02T11:31:00+09:00",
+      "updated_at": "2026-03-02T11:31:00+09:00"
+    },
+    {
+      "id": "book_20260302_0010",
+      "title": "これからの「正義」の話をしよう",
+      "author": "マイケル・サンデル",
+      "cover_image": "https://m.media-amazon.com/images/I/5169SdTEimL.jpg",
+      "created_at": "2026-03-02T11:32:00+09:00",
+      "updated_at": "2026-03-02T11:32:00+09:00"
+    },
+    {
+      "id": "book_20260302_0011",
+      "title": "それをお金で買いますか",
+      "author": "マイケル・サンデル",
+      "cover_image": "https://m.media-amazon.com/images/I/51RuVuU2rHL.jpg",
+      "created_at": "2026-03-02T11:33:00+09:00",
+      "updated_at": "2026-03-02T11:33:00+09:00"
+    },
+    {
+      "id": "book_20260302_0012",
+      "title": "実力も運のうち",
+      "author": "マイケル・サンデル",
+      "cover_image": "https://m.media-amazon.com/images/I/710JkLsDU4L._SL1500_.jpg",
+      "created_at": "2026-03-02T11:34:00+09:00",
+      "updated_at": "2026-03-02T11:34:00+09:00"
+    },
+    {
+      "id": "book_20260302_0013",
+      "title": "ホモ・デウス",
+      "author": "ユヴァル・ノア・ハラリ",
+      "cover_image": "https://m.media-amazon.com/images/I/71Q4MHtMpbL._SL1500_.jpg",
+      "created_at": "2026-03-02T11:40:00+09:00",
+      "updated_at": "2026-03-02T11:40:00+09:00"
+    },
+    {
+      "id": "book_20260302_0014",
+      "title": "21 Lessons",
+      "author": "Yuval Noah Harari",
+      "cover_image": "https://m.media-amazon.com/images/I/613Y1yZPiSL._SL1500_.jpg",
+      "created_at": "2026-03-02T11:41:00+09:00",
+      "updated_at": "2026-03-02T11:41:00+09:00"
+    },
+    {
+      "id": "book_20260302_0015",
+      "title": "NEXUS 情報の人類史 上",
+      "author": "ユヴァル・ノア・ハラリ",
+      "cover_image": "https://m.media-amazon.com/images/I/71M3npU68tL._SL1500_.jpg",
+      "created_at": "2026-03-02T11:42:00+09:00",
+      "updated_at": "2026-03-02T11:42:00+09:00"
+    },
+    {
+      "id": "book_20260302_0016",
+      "title": "NEXUS 情報の人類史 下",
+      "author": "ユヴァル・ノア・ハラリ",
+      "cover_image": "https://m.media-amazon.com/images/I/71U9cb3UlBL._SL1500_.jpg",
+      "created_at": "2026-03-02T11:43:00+09:00",
+      "updated_at": "2026-03-02T11:43:00+09:00"
+    }
+  ],
+  "entries": [
+    {
+      "id": "entry_20260302_0001",
+      "book_id": "book_20260302_0001",
+      "core": "神話は大規模協力のOS",
+      "context_quote": "人類は共通の虚構を信じることで、血縁を超えた大規模な協力を成立させてきた。",
+      "context_summary": "宗教や国家、貨幣のような共有された物語が、見知らぬ他者同士の協力を可能にしたという要点。",
+      "context_note": "制度設計より先に物語設計を考える必要がある。共同体は物語のUIでもある。",
+      "tags": ["歴史", "協力", "神話"],
+      "locator": "第2部 / Kindle location 1234-1300",
+      "time_meta": {
+        "captured_at": "2026-03-02T10:05:00+09:00",
+        "context_link": ""
+      },
+      "created_at": "2026-03-02T10:05:00+09:00",
+      "updated_at": "2026-03-02T10:05:00+09:00"
+    },
+    {
+      "id": "entry_20260302_0002",
+      "book_id": "book_20260302_0001",
+      "core": "農業革命は幸福のアップデートではない",
+      "context_quote": "農業は人口を増やしたが、個人の生活を楽にしたわけではない。",
+      "context_summary": "マクロの成功とミクロの幸福は一致しないという読み替え。",
+      "context_note": "プロダクトの成長指標も同じ罠に入る。規模の拡大は体験の改善と別物。",
+      "tags": ["進歩", "幸福", "文明"],
+      "locator": "第1部",
+      "time_meta": {
+        "captured_at": "2026-03-02T09:48:00+09:00",
+        "context_link": ""
+      },
+      "created_at": "2026-03-02T09:48:00+09:00",
+      "updated_at": "2026-03-02T09:48:00+09:00"
+    },
+    {
+      "id": "entry_20260302_0009",
+      "book_id": "book_20260302_0005",
+      "core": "競争を避けるにはカテゴリごと作る",
+      "context_quote": "ただ勝つのでなく、違うゲームを設計しなければ独自性は続かない。",
+      "context_summary": "既存市場の最適化より、独自カテゴリの設計が重要という論点。",
+      "context_note": "読書メモ管理ではなく『第2の脳』として切るのは正しい。",
+      "tags": ["戦略", "カテゴリ", "差別化"],
+      "locator": "Chapter 5",
+      "time_meta": {
+        "captured_at": "2026-03-01T23:12:00+09:00",
+        "context_link": ""
+      },
+      "created_at": "2026-03-01T23:12:00+09:00",
+      "updated_at": "2026-03-01T23:12:00+09:00"
+    },
+    {
+      "id": "entry_20260302_0010",
+      "book_id": "book_20260302_0005",
+      "core": "秘密はまだ誰も十分に考えていない真実",
+      "context_quote": "重要なのに見過ごされている真実を見つけることが、新しい価値の起点になる。",
+      "context_summary": "新規性は派手さではなく、未解像の重要性にある。",
+      "context_note": "断片メモの中から『秘密』っぽい問いを掘り起こす機能も相性がいい。",
+      "tags": ["秘密", "価値", "新規性"],
+      "locator": "Chapter 1",
+      "time_meta": {
+        "captured_at": "2026-03-01T21:55:00+09:00",
+        "context_link": ""
+      },
+      "created_at": "2026-03-01T21:55:00+09:00",
+      "updated_at": "2026-03-01T21:55:00+09:00"
+    },
+    {
+      "id": "entry_20260302_0013",
+      "book_id": "book_20260302_0007",
+      "core": "相手の重要感を傷つけない",
+      "context_quote": "人はだれでも、自分が重要な存在だと感じたい。その感覚を損なうと心は閉じる。",
+      "context_summary": "相手を動かす前に、相手の自尊心を不用意に傷つけないことが関係づくりの前提になる。",
+      "context_note": "助言や修正を入れるUIでも、相手の否定から入らない順番設計が要る。",
+      "tags": ["対人関係", "尊重", "コミュニケーション"],
+      "locator": "第1部",
+      "time_meta": {
+        "captured_at": "2026-03-02T11:18:00+09:00",
+        "context_link": ""
+      },
+      "created_at": "2026-03-02T11:18:00+09:00",
+      "updated_at": "2026-03-02T11:18:00+09:00"
+    }
+  ]
+}

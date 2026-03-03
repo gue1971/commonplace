@@ -1,11 +1,10 @@
-const CACHE_NAME = "commonplace-v3";
+const CACHE_NAME = "commonplace-v4";
 const ASSETS = [
   "./",
   "./index.html",
   "./styles.css",
   "./src/app.js",
-  "./data/books.json",
-  "./data/entries.json",
+  "./data/commonplace.json",
   "./manifest.webmanifest",
   "./icons/icon-192.png",
   "./icons/icon-512.png",

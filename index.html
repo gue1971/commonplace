@@ -13,21 +13,42 @@
   <body>
     <div class="app-shell">
       <header class="topbar">
-        <button id="topbar-back-button" class="back-link topbar-back-button" type="button" hidden>←</button>
+        <button id="topbar-back-button" class="back-link topbar-back-button" type="button" hidden aria-label="戻る">
+          <svg class="icon-glyph icon-glyph-back" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+          </svg>
+        </button>
         <h1 id="app-title">Commonplace</h1>
         <div class="topbar-actions">
-          <button id="load-data-button" class="secondary-button" type="button">読込</button>
-          <button id="save-data-button" class="secondary-button" type="button">保存</button>
-          <button id="create-book-top-button" class="secondary-button" type="button">追加</button>
-          <button id="open-search-button" class="secondary-button" type="button">検索</button>
+          <button id="load-data-button" class="secondary-button icon-button toolbar-icon-button" type="button" aria-label="インポート">
+            <svg class="icon-glyph" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 4.5v10M8 10.5l4 4 4-4M5 19.5h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+            </svg>
+          </button>
+          <button id="save-data-button" class="secondary-button icon-button toolbar-icon-button" type="button" aria-label="エクスポート">
+            <svg class="icon-glyph" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 19.5v-10M8 13.5l4-4 4 4M5 4.5h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+            </svg>
+          </button>
+          <button id="create-book-top-button" class="secondary-button icon-button toolbar-icon-button" type="button" aria-label="追加">
+            <svg class="icon-glyph" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" fill="none" />
+            </svg>
+          </button>
+          <button id="open-search-button" class="secondary-button icon-button toolbar-icon-button" type="button" aria-label="検索">
+            <svg class="icon-glyph" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M11 18.5a7.5 7.5 0 1 0 0-15 7.5 7.5 0 0 0 0 15ZM16.5 16.5 20 20" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+            </svg>
+          </button>
           <button id="topbar-create-entry-button" class="secondary-button icon-button" type="button" hidden aria-label="メモを追加">
             <svg class="icon-glyph" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M12 5v14M5 12h14" />
+              <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" fill="none" />
             </svg>
           </button>
         </div>
       </header>
 
+      <input id="import-file-input" type="file" accept="application/json,.json" hidden />
       <main id="app" class="app-main"></main>
     </div>
 
