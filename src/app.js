@@ -38,7 +38,19 @@ const entryForm = document.querySelector("#entry-form");
 const entryDialogTitle = document.querySelector("#entry-dialog-title");
 const cancelEntryButton = document.querySelector("#cancel-entry-button");
 const deleteEntryButton = document.querySelector("#delete-entry-button");
+const clearEntryImageButton = document.querySelector("#clear-entry-image-button");
+const entryImagePreview = document.querySelector("#entry-image-preview");
 const entryBookLabel = document.querySelector("#entry-book-label");
+const entryViewDialog = document.querySelector("#entry-view-dialog");
+const entryViewTitle = document.querySelector("#entry-view-title");
+const entryViewBookLabel = document.querySelector("#entry-view-book-label");
+const entryViewContent = document.querySelector("#entry-view-content");
+const closeEntryViewButton = document.querySelector("#close-entry-view-button");
+const editEntryViewButton = document.querySelector("#edit-entry-view-button");
+const entryImageDialog = document.querySelector("#entry-image-dialog");
+const entryImageDialogTitle = document.querySelector("#entry-image-dialog-title");
+const entryImageLightboxImage = document.querySelector("#entry-image-lightbox-image");
+const closeEntryImageButton = document.querySelector("#close-entry-image-button");
 const deleteEntryDialog = document.querySelector("#delete-entry-dialog");
 const deleteEntryForm = document.querySelector("#delete-entry-form");
 const deleteEntrySummary = document.querySelector("#delete-entry-summary");
@@ -50,6 +62,12 @@ const bookDialogState = {
   previewObjectUrl: null,
 };
 const entryDialogState = {
+  bookId: null,
+  entryId: null,
+  returnToView: false,
+  clearImage: false,
+};
+const entryViewState = {
   bookId: null,
   entryId: null,
 };
@@ -186,6 +204,34 @@ function wireGlobalEvents() {
     event.preventDefault();
     closeEntryDialog();
   });
+  closeEntryViewButton.addEventListener("click", () => closeEntryViewDialog());
+  editEntryViewButton.addEventListener("click", () => {
+    const { bookId, entryId } = entryViewState;
+    if (!bookId || !entryId) {
+      return;
+    }
+
+    closeEntryViewDialog({ skipNavigation: true });
+    openEntryDialog(bookId, entryId, { returnToView: true });
+  });
+  entryViewDialog.addEventListener("cancel", (event) => {
+    event.preventDefault();
+    closeEntryViewDialog();
+  });
+  closeEntryImageButton.addEventListener("click", () => closeEntryImageDialog());
+  entryImageDialog.addEventListener("cancel", (event) => {
+    event.preventDefault();
+    closeEntryImageDialog();
+  });
+  clearEntryImageButton.addEventListener("click", () => {
+    entryDialogState.clearImage = true;
+    entryForm.elements.context_images.value = "";
+    updateEntryImagePreview();
+  });
+  entryForm.elements.context_images.addEventListener("input", () => {
+    entryDialogState.clearImage = false;
+    updateEntryImagePreview();
+  });
   entryForm.addEventListener("submit", saveEntryFromDialog);
   deleteEntryButton.addEventListener("click", openDeleteEntryDialog);
   cancelDeleteEntryButton.addEventListener("click", closeDeleteEntryDialog);
@@ -287,12 +333,24 @@ function render() {
     if (entryDialog.open) {
       closeEntryDialog({ skipNavigation: true });
     }
+    if (entryViewDialog.open) {
+      closeEntryViewDialog({ skipNavigation: true });
+    }
+    if (entryImageDialog.open) {
+      closeEntryImageDialog();
+    }
     renderSearchScreen();
     return;
   }
 
   if (entryDialog.open) {
     closeEntryDialog({ skipNavigation: true });
+  }
+  if (entryViewDialog.open) {
+    closeEntryViewDialog({ skipNavigation: true });
+  }
+  if (entryImageDialog.open) {
+    closeEntryImageDialog();
   }
 
   renderLibraryScreen();
@@ -380,14 +438,12 @@ function renderLibraryScreen() {
                   <span class="library-list-updated">${formatDateShort(getBookUpdatedAt(book))}更新</span>
                 </div>
               </div>
-              <button class="library-card-edit library-list-edit" type="button" data-edit-book-id="${book.id}" aria-label="本を編集">✎</button>
             </article>
           `;
         }
 
         return `
           <article class="library-card" data-book-id="${book.id}">
-            <button class="library-card-edit" type="button" data-edit-book-id="${book.id}" aria-label="本を編集">✎</button>
             <button class="library-card-button" type="button" data-book-id="${book.id}">
               ${coverMarkup}
             </button>
@@ -402,19 +458,10 @@ function renderLibraryScreen() {
     });
     grid.querySelectorAll(".library-list-item").forEach((item) => {
       item.addEventListener("click", (event) => {
-        if (event.target.closest("[data-edit-book-id], [data-tag-query]")) {
+        if (event.target.closest("[data-tag-query]")) {
           return;
         }
         navigateTo({ screen: "book", bookId: item.dataset.bookId });
-      });
-    });
-    grid.querySelectorAll("[data-edit-book-id]").forEach((button) => {
-      button.addEventListener("click", (event) => {
-        event.stopPropagation();
-        const book = state.books.find((item) => item.id === button.dataset.editBookId);
-        if (book) {
-          openBookDialog(book);
-        }
       });
     });
     grid.querySelectorAll(".library-list-item [data-tag-query]").forEach((button) => {
@@ -478,6 +525,7 @@ function renderBookScreen(bookId, entryId = null) {
               <div class="entry-core">${escapeHtml(entry.core || "無題のメモ")}</div>
               <div class="quote-preview">${escapeHtml(preview || "引用または要約を追加するとここに表示されます")}</div>
             </button>
+            <button class="entry-card-edit" type="button" data-edit-entry-id="${entry.id}" aria-label="メモを編集">✎</button>
             ${tagsMarkup ? `<div class="tag-row entry-tag-row">${tagsMarkup}</div>` : ""}
           </article>
         `;
@@ -486,6 +534,12 @@ function renderBookScreen(bookId, entryId = null) {
 
     list.querySelectorAll("[data-entry-id]").forEach((button) => {
       button.addEventListener("click", () => navigateTo({ screen: "entry", bookId: book.id, entryId: button.dataset.entryId }));
+    });
+    list.querySelectorAll("[data-edit-entry-id]").forEach((button) => {
+      button.addEventListener("click", (event) => {
+        event.stopPropagation();
+        openEntryDialog(book.id, button.dataset.editEntryId, { returnToView: false });
+      });
     });
     list.querySelectorAll("[data-tag-query]").forEach((button) => {
       button.addEventListener("click", (event) => {
@@ -501,16 +555,19 @@ function renderBookScreen(bookId, entryId = null) {
   mount(fragment);
 
   if (entryId) {
-    openEntryDialog(book.id, entryId);
+    openEntryViewDialog(book.id, entryId);
     return;
   }
 
   if (entryDialog.open) {
     closeEntryDialog({ skipNavigation: true });
   }
+  if (entryViewDialog.open) {
+    closeEntryViewDialog({ skipNavigation: true });
+  }
 }
 
-function openEntryDialog(bookId, entryId) {
+function openEntryDialog(bookId, entryId, { returnToView = false } = {}) {
   const book = state.books.find((item) => item.id === bookId);
   const entry = state.entries.find((item) => item.id === entryId);
 
@@ -519,8 +576,16 @@ function openEntryDialog(bookId, entryId) {
     return;
   }
 
+  if (entryViewDialog.open) {
+    closeEntryViewDialog({ skipNavigation: true });
+  }
+  if (entryImageDialog.open) {
+    closeEntryImageDialog();
+  }
+
   entryDialogState.bookId = book.id;
   entryDialogState.entryId = entry.id;
+  entryDialogState.returnToView = returnToView;
   entryDialogTitle.textContent = book.title;
   entryBookLabel.textContent = "";
   entryForm.elements.core.value = entry.core || "";
@@ -530,9 +595,53 @@ function openEntryDialog(bookId, entryId) {
   entryForm.elements.tags.value = (entry.tags || []).join(", ");
   entryForm.elements.locator.value = entry.locator || "";
   entryForm.elements.context_link.value = entry.time_meta?.context_link || "";
+  entryForm.elements.context_images.value = getEntryImages(entry).map((image) => getEditableCoverValue(image)).join("\n");
+  entryDialogState.clearImage = false;
+  updateEntryImagePreview(entry);
 
   if (!entryDialog.open) {
     entryDialog.showModal();
+  }
+}
+
+function openEntryViewDialog(bookId, entryId) {
+  const book = state.books.find((item) => item.id === bookId);
+  const entry = state.entries.find((item) => item.id === entryId);
+
+  if (!book || !entry) {
+    navigateTo({ screen: "book", bookId });
+    return;
+  }
+
+  if (entryDialog.open) {
+    closeEntryDialog({ skipNavigation: true });
+  }
+
+  entryViewState.bookId = book.id;
+  entryViewState.entryId = entry.id;
+  entryViewTitle.textContent = entry.core || "無題のメモ";
+  entryViewBookLabel.textContent = entry.locator ? `${book.title} / ${entry.locator}` : book.title;
+  entryViewContent.innerHTML = renderEntryViewMarkup(entry);
+
+  entryViewContent.querySelectorAll("[data-entry-view-image]").forEach((button) => {
+    const imageSrc = button.dataset.entryViewImage || "";
+    const openImage = () => openEntryImageDialog(imageSrc, entry.core || book.title);
+    button.addEventListener("click", openImage);
+    button.addEventListener("dblclick", openImage);
+  });
+  entryViewContent.querySelectorAll("[data-tag-query]").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const query = button.dataset.tagQuery || "";
+      state.globalSearchDraft = query;
+      state.globalSearch = query;
+      closeEntryViewDialog({ skipNavigation: true });
+      navigateTo({ screen: "search" });
+    });
+  });
+
+  if (!entryViewDialog.open) {
+    entryViewDialog.showModal();
   }
 }
 
@@ -555,6 +664,11 @@ async function saveEntryFromDialog(event) {
     context_quote: normalizeText(entryForm.elements.context_quote.value),
     context_summary: normalizeText(entryForm.elements.context_summary.value),
     context_note: normalizeText(entryForm.elements.context_note.value),
+    context_images: resolveEntryImagesValue({
+      typedImages: parseImagePaths(entryForm.elements.context_images.value),
+      existingImages: getEntryImages(entry),
+      clearImage: entryDialogState.clearImage,
+    }),
     tags: parseTags(entryForm.elements.tags.value),
     locator: normalizeText(entryForm.elements.locator.value),
     time_meta: {
@@ -587,6 +701,10 @@ async function deleteEntryFromDialog() {
 }
 
 function closeEntryDialog({ skipNavigation = false } = {}) {
+  const bookId = entryDialogState.bookId;
+  const entryId = entryDialogState.entryId;
+  const returnToView = entryDialogState.returnToView;
+
   if (entryDialog.open) {
     entryDialog.close();
   }
@@ -595,10 +713,61 @@ function closeEntryDialog({ skipNavigation = false } = {}) {
   entryDialogTitle.textContent = "編集";
   entryDialogState.bookId = null;
   entryDialogState.entryId = null;
+  entryDialogState.returnToView = false;
+  entryDialogState.clearImage = false;
+  updateEntryImagePreview();
+
+  if (!skipNavigation && returnToView && bookId && entryId) {
+    openEntryViewDialog(bookId, entryId);
+    return;
+  }
 
   if (!skipNavigation && state.route.screen === "entry" && state.route.bookId) {
     navigateTo({ screen: "book", bookId: state.route.bookId });
   }
+}
+
+function closeEntryViewDialog({ skipNavigation = false } = {}) {
+  if (entryImageDialog.open) {
+    closeEntryImageDialog();
+  }
+
+  if (entryViewDialog.open) {
+    entryViewDialog.close();
+  }
+
+  entryViewTitle.textContent = "メモ";
+  entryViewBookLabel.textContent = "";
+  entryViewContent.innerHTML = "";
+  entryViewState.bookId = null;
+  entryViewState.entryId = null;
+
+  if (!skipNavigation && state.route.screen === "entry" && state.route.bookId) {
+    navigateTo({ screen: "book", bookId: state.route.bookId });
+  }
+}
+
+function openEntryImageDialog(imageSrc, title) {
+  if (!imageSrc) {
+    return;
+  }
+
+  entryImageDialogTitle.textContent = title || "画像";
+  entryImageLightboxImage.src = imageSrc;
+  entryImageLightboxImage.alt = title || "画像";
+  if (!entryImageDialog.open) {
+    entryImageDialog.showModal();
+  }
+}
+
+function closeEntryImageDialog() {
+  if (entryImageDialog.open) {
+    entryImageDialog.close();
+  }
+
+  entryImageDialogTitle.textContent = "画像";
+  entryImageLightboxImage.removeAttribute("src");
+  entryImageLightboxImage.alt = "";
 }
 
 function openDeleteEntryDialog() {
@@ -920,6 +1089,7 @@ function createEmptyEntry(bookId) {
     context_quote: "",
     context_summary: "",
     context_note: "",
+    context_images: [],
     tags: [],
     locator: "",
     time_meta: {
@@ -1051,6 +1221,74 @@ function formatDateShort(value) {
   return `${year}/${month}/${day}`;
 }
 
+function renderEntryViewMarkup(entry) {
+  const sections = [
+    renderEntryViewImages(getEntryImages(entry), entry.core || "メモ画像"),
+    renderEntryViewSection("引用・抜粋", entry.context_quote),
+    renderEntryViewSection("要約", entry.context_summary),
+    renderEntryViewSection("メモ・考え", entry.context_note),
+    renderEntryViewSection("位置情報", entry.locator),
+    renderEntryViewTags(entry.tags || []),
+    renderEntryViewSection("関連リンク", entry.time_meta?.context_link),
+  ].filter(Boolean);
+
+  return sections.join("");
+}
+
+function renderEntryViewImages(images, title) {
+  if (!images.length) {
+    return "";
+  }
+
+  const imagesMarkup = images
+    .map(
+      (imageSrc, index) => `
+        <button class="entry-view-image-button" type="button" data-entry-view-image="${escapeHtml(imageSrc)}" aria-label="画像${index + 1}を拡大">
+          <img class="entry-view-image" src="${escapeHtml(imageSrc)}" alt="${escapeHtml(title)}" />
+        </button>
+      `
+    )
+    .join("");
+
+  return `
+    <section class="entry-view-section">
+      <h4>画像</h4>
+      <div class="entry-view-image-stack">${imagesMarkup}</div>
+    </section>
+  `;
+}
+
+function renderEntryViewSection(label, value) {
+  const normalized = normalizeText(value);
+  if (!normalized) {
+    return "";
+  }
+
+  return `
+    <section class="entry-view-section">
+      <h4>${escapeHtml(label)}</h4>
+      <p>${escapeHtml(normalized).replaceAll("\n", "<br />")}</p>
+    </section>
+  `;
+}
+
+function renderEntryViewTags(tags) {
+  if (!tags.length) {
+    return "";
+  }
+
+  const tagsMarkup = tags
+    .map((tag) => `<button class="tag-pill tag-pill-button" type="button" data-tag-query="${escapeHtml(tag)}">${escapeHtml(tag)}</button>`)
+    .join("");
+
+  return `
+    <section class="entry-view-section">
+      <h4>タグ</h4>
+      <div class="tag-row">${tagsMarkup}</div>
+    </section>
+  `;
+}
+
 function escapeHtml(value) {
   return String(value)
     .replaceAll("&", "&amp;")
@@ -1071,6 +1309,62 @@ function renderBookCoverMarkup(book, imageClassName) {
       }
     </div>
   `;
+}
+
+function updateEntryImagePreview(entry = null) {
+  const previewEntry = entry || state.entries.find((item) => item.id === entryDialogState.entryId) || {
+    core: normalizeText(entryForm.elements.core.value) || "画像プレビュー",
+    context_images: [],
+  };
+
+  const images = entryDialogState.clearImage
+    ? []
+    : parseImagePaths(entryForm.elements.context_images.value).length
+      ? parseImagePaths(entryForm.elements.context_images.value)
+      : getEntryImages(previewEntry);
+
+  if (!images.length) {
+    entryImagePreview.innerHTML = `<div class="empty-state">画像はまだありません。</div>`;
+    return;
+  }
+
+  entryImagePreview.innerHTML = images
+    .map(
+      (imageSrc) =>
+        `<img class="entry-image-preview-image" src="${escapeHtml(imageSrc)}" alt="${escapeHtml(previewEntry.core || "メモ画像")}" />`
+    )
+    .join("");
+}
+
+function resolveEntryImagesValue({ typedImages, existingImages, clearImage }) {
+  if (typedImages.length) {
+    return typedImages;
+  }
+
+  if (clearImage) {
+    return [];
+  }
+
+  return existingImages;
+}
+
+function getEntryImages(entry) {
+  if (Array.isArray(entry?.context_images) && entry.context_images.length) {
+    return entry.context_images.filter(Boolean);
+  }
+
+  if (entry?.context_image) {
+    return [entry.context_image];
+  }
+
+  return [];
+}
+
+function parseImagePaths(value) {
+  return String(value || "")
+    .split(/\r?\n|,/)
+    .map((item) => normalizeText(item))
+    .filter(Boolean);
 }
 
 function readFileAsDataUrl(file) {

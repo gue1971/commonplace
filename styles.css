@@ -751,6 +751,10 @@ body[data-screen="search"] .topbar-actions {
   gap: 10px;
 }
 
+.entry-card {
+  position: relative;
+}
+
 .search-card {
   background: var(--panel-strong);
 }
@@ -764,6 +768,27 @@ body[data-screen="search"] .topbar-actions {
   display: grid;
   gap: 10px;
   width: 100%;
+}
+
+.entry-card-button {
+  padding-right: 24px;
+}
+
+.entry-card-edit {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 2;
+  background: transparent;
+  border: none;
+  color: rgba(36, 27, 18, 0.46);
+  font-size: 0.82rem;
+  line-height: 1;
+  padding: 0;
+}
+
+.entry-card-edit:hover {
+  color: rgba(36, 27, 18, 0.68);
 }
 
 .entry-tag-row {
@@ -827,6 +852,15 @@ body[data-screen="search"] .topbar-actions {
   max-width: 680px;
 }
 
+.entry-view-dialog-form {
+  max-width: 760px;
+}
+
+.entry-image-dialog-form {
+  max-width: min(92vw, 1080px);
+  background: rgba(251, 247, 239, 0.96);
+}
+
 .confirm-dialog-form {
   max-width: 420px;
 }
@@ -851,6 +885,89 @@ body[data-screen="search"] .topbar-actions {
 .field-label {
   font-size: 0.85rem;
   color: var(--muted);
+}
+
+.entry-view-content {
+  display: grid;
+  gap: 14px;
+}
+
+.entry-view-section {
+  display: grid;
+  gap: 8px;
+  text-align: left;
+}
+
+.entry-view-section h4 {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.entry-view-section p {
+  margin: 0;
+  font-size: 0.98rem;
+  line-height: 1.7;
+  color: var(--text);
+}
+
+.entry-view-image-button {
+  display: block;
+  width: 100%;
+  padding: 0;
+  background: transparent;
+  border: none;
+  cursor: zoom-in;
+}
+
+.entry-view-image-stack {
+  display: grid;
+  gap: 12px;
+}
+
+.entry-view-image {
+  display: block;
+  width: 100%;
+  max-height: min(52vh, 420px);
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+  background: rgba(243, 236, 226, 0.7);
+}
+
+.entry-image-preview {
+  min-height: 160px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(76, 61, 47, 0.15);
+  background: rgba(255, 253, 248, 0.92);
+  overflow: hidden;
+  display: grid;
+  gap: 10px;
+  padding: 10px;
+}
+
+.entry-image-preview-image {
+  display: block;
+  width: 100%;
+  max-height: 320px;
+  object-fit: contain;
+  background: transparent;
+}
+
+.entry-image-lightbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: min(72vh, 720px);
+}
+
+.entry-image-lightbox-image {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  max-height: min(72vh, 720px);
+  object-fit: contain;
+  background: transparent;
 }
 
 .book-cover-preview {

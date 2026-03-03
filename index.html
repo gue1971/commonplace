@@ -202,12 +202,53 @@
           <input name="context_link" type="text" placeholder="関連メモやURL" />
         </label>
 
+        <label class="field">
+          <span>画像パス</span>
+          <textarea name="context_images" rows="3" placeholder="images/example-1.png&#10;images/example-2.png"></textarea>
+        </label>
+
+        <div class="cover-preview-block">
+          <span class="field-label">画像プレビュー</span>
+          <div id="entry-image-preview" class="entry-image-preview"></div>
+        </div>
+
         <div class="form-actions">
+          <button id="clear-entry-image-button" class="ghost-button" type="button">画像をクリア</button>
           <button id="cancel-entry-button" class="secondary-button" type="button">閉じる</button>
           <button id="delete-entry-button" class="danger-button" type="button">削除</button>
           <button class="primary-button" type="submit">保存</button>
         </div>
       </form>
+    </dialog>
+
+    <dialog id="entry-view-dialog" class="dialog">
+      <div class="dialog-form entry-view-dialog-form">
+        <div class="dialog-header">
+          <h3 id="entry-view-title">メモ</h3>
+          <p id="entry-view-book-label" class="muted-text entry-book-label"></p>
+        </div>
+
+        <div id="entry-view-content" class="entry-view-content"></div>
+
+        <div class="form-actions">
+          <button id="close-entry-view-button" class="secondary-button" type="button">閉じる</button>
+          <button id="edit-entry-view-button" class="primary-button" type="button">編集</button>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog id="entry-image-dialog" class="dialog entry-image-dialog">
+      <div class="dialog-form entry-image-dialog-form">
+        <div class="dialog-header">
+          <h3 id="entry-image-dialog-title">画像</h3>
+        </div>
+        <div class="entry-image-lightbox">
+          <img id="entry-image-lightbox-image" class="entry-image-lightbox-image" alt="" />
+        </div>
+        <div class="form-actions">
+          <button id="close-entry-image-button" class="secondary-button" type="button">閉じる</button>
+        </div>
+      </div>
     </dialog>
 
     <dialog id="delete-entry-dialog" class="dialog">
