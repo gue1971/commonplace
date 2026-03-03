@@ -80,7 +80,7 @@ function wireGlobalEvents() {
 
   toggleLibraryViewButton.addEventListener("click", () => {
     state.libraryView = state.libraryView === "grid" ? "list" : "grid";
-    renderLibraryScreen();
+    render();
   });
   loadDataButton.addEventListener("click", () => importFileInput.click());
   importFileInput.addEventListener("change", importDataFile);

@@ -285,6 +285,7 @@ textarea {
   height: 28px;
   display: block;
   overflow: visible;
+  pointer-events: none;
 }
 
 .toolbar-icon-button .icon-glyph {
