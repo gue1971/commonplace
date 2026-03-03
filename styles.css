@@ -629,6 +629,16 @@ body[data-screen="search"] .topbar-actions {
   border: none;
   padding: 0;
   background: transparent;
+  width: min(calc(100vw - 24px), 680px);
+  max-width: 680px;
+  max-height: calc(100dvh - 24px);
+  margin: auto;
+  overflow: visible;
+}
+
+.dialog[open] {
+  display: grid;
+  place-items: center;
 }
 
 .dialog::backdrop {
@@ -637,17 +647,22 @@ body[data-screen="search"] .topbar-actions {
 }
 
 .dialog-form {
-  width: min(92vw, 520px);
+  width: 100%;
+  max-width: 520px;
   display: grid;
   gap: 16px;
+  margin: 0;
+  max-height: calc(100dvh - 24px);
+  overflow: auto;
+  overscroll-behavior: contain;
 }
 
 .entry-dialog-form {
-  width: min(92vw, 680px);
+  max-width: 680px;
 }
 
 .confirm-dialog-form {
-  width: min(92vw, 420px);
+  max-width: 420px;
 }
 
 .dialog-header {
@@ -991,6 +1006,17 @@ body[data-screen="search"] .topbar-actions {
   body[data-screen="book"] .book-subbar-search input {
     padding: 8px 10px;
     font-size: 0.82rem;
+  }
+
+  .dialog {
+    width: calc(100vw - 20px);
+    max-width: calc(100vw - 20px);
+    max-height: calc(100dvh - 20px);
+  }
+
+  .dialog-form {
+    gap: 14px;
+    max-height: calc(100dvh - 20px);
   }
 
 }
