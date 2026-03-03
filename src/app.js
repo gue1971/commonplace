@@ -361,15 +361,25 @@ function renderLibraryScreen() {
         );
 
         if (state.libraryView === "list") {
+          const latestEntry = getEntriesForBook(book.id)[0];
+          const listTagsMarkup = (latestEntry?.tags || [])
+            .slice(0, 3)
+            .map(
+              (tag) =>
+                `<button class="tag-pill tag-pill-button library-list-tag" type="button" data-tag-query="${escapeHtml(tag)}">${escapeHtml(tag)}</button>`
+            )
+            .join("");
           return `
             <article class="library-list-item" data-book-id="${book.id}">
-              <button class="library-card-button library-list-button" type="button" data-book-id="${book.id}">
-                <div class="library-list-cover">${coverMarkup}</div>
-                <div class="library-list-body">
-                  <strong class="library-card-title library-list-title">${escapeHtml(book.title)}</strong>
-                  <span class="muted-text library-card-author library-list-author">${escapeHtml(book.author || "著者未設定")}</span>
+              <div class="library-list-cover">${coverMarkup}</div>
+              <div class="library-list-body">
+                <strong class="library-card-title library-list-title">${escapeHtml(book.title)}</strong>
+                <span class="muted-text library-card-author library-list-author">${escapeHtml(book.author || "著者未設定")}</span>
+                <div class="library-list-meta">
+                  <div class="library-list-tags">${listTagsMarkup}</div>
+                  <span class="library-list-updated">${formatDateShort(getBookUpdatedAt(book))}更新</span>
                 </div>
-              </button>
+              </div>
               <button class="library-card-edit library-list-edit" type="button" data-edit-book-id="${book.id}" aria-label="本を編集">✎</button>
             </article>
           `;
@@ -380,10 +390,6 @@ function renderLibraryScreen() {
             <button class="library-card-edit" type="button" data-edit-book-id="${book.id}" aria-label="本を編集">✎</button>
             <button class="library-card-button" type="button" data-book-id="${book.id}">
               ${coverMarkup}
-              <div class="library-card-body">
-                <strong class="library-card-title">${escapeHtml(book.title)}</strong>
-                <span class="muted-text library-card-author">${escapeHtml(book.author || "著者未設定")}</span>
-              </div>
             </button>
           </article>
         `;
@@ -394,6 +400,14 @@ function renderLibraryScreen() {
     grid.querySelectorAll("[data-book-id]").forEach((button) => {
       button.addEventListener("click", () => navigateTo({ screen: "book", bookId: button.dataset.bookId }));
     });
+    grid.querySelectorAll(".library-list-item").forEach((item) => {
+      item.addEventListener("click", (event) => {
+        if (event.target.closest("[data-edit-book-id], [data-tag-query]")) {
+          return;
+        }
+        navigateTo({ screen: "book", bookId: item.dataset.bookId });
+      });
+    });
     grid.querySelectorAll("[data-edit-book-id]").forEach((button) => {
       button.addEventListener("click", (event) => {
         event.stopPropagation();
@@ -401,6 +415,15 @@ function renderLibraryScreen() {
         if (book) {
           openBookDialog(book);
         }
+      });
+    });
+    grid.querySelectorAll(".library-list-item [data-tag-query]").forEach((button) => {
+      button.addEventListener("click", (event) => {
+        event.stopPropagation();
+        const query = button.dataset.tagQuery || "";
+        state.globalSearchDraft = query;
+        state.globalSearch = query;
+        navigateTo({ screen: "search" });
       });
     });
   }
@@ -454,8 +477,8 @@ function renderBookScreen(bookId, entryId = null) {
             <button class="entry-card-button" type="button" data-entry-id="${entry.id}">
               <div class="entry-core">${escapeHtml(entry.core || "無題のメモ")}</div>
               <div class="quote-preview">${escapeHtml(preview || "引用または要約を追加するとここに表示されます")}</div>
-              ${tagsMarkup ? `<div class="tag-row">${tagsMarkup}</div>` : ""}
             </button>
+            ${tagsMarkup ? `<div class="tag-row entry-tag-row">${tagsMarkup}</div>` : ""}
           </article>
         `;
       })
@@ -633,10 +656,12 @@ function renderSearchScreen() {
         const preview = createPreview(entry.context_quote || entry.context_summary || entry.context_note);
         return `
           <article class="search-card">
+            <div class="meta-row">
+              <button class="meta-pill search-book-chip" type="button" data-search-book-id="${entry.book_id}">${escapeHtml(
+                book?.title || "未分類"
+              )}</button>
+            </div>
             <button class="search-card-button" type="button" data-book-id="${entry.book_id}" data-entry-id="${entry.id}">
-              <div class="meta-row">
-                <span class="meta-pill">${escapeHtml(book?.title || "未分類")}</span>
-              </div>
               <div class="search-core">${escapeHtml(entry.core || "無題のメモ")}</div>
               <div class="search-preview">${escapeHtml(preview || "プレビューなし")}</div>
             </button>
@@ -649,6 +674,9 @@ function renderSearchScreen() {
       button.addEventListener("click", () =>
         navigateTo({ screen: "entry", bookId: button.dataset.bookId, entryId: button.dataset.entryId })
       );
+    });
+    results.querySelectorAll("[data-search-book-id]").forEach((button) => {
+      button.addEventListener("click", () => navigateTo({ screen: "book", bookId: button.dataset.searchBookId }));
     });
   }
 
@@ -1009,6 +1037,18 @@ function formatDateCompact(value) {
   const hours = String(date.getHours()).padStart(2, "0");
   const minutes = String(date.getMinutes()).padStart(2, "0");
   return `${year}/${month}/${day} ${hours}:${minutes}`;
+}
+
+function formatDateShort(value) {
+  if (!value) {
+    return "-";
+  }
+
+  const date = new Date(value);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}/${month}/${day}`;
 }
 
 function escapeHtml(value) {
