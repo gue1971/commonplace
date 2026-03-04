@@ -860,6 +860,16 @@ body[data-screen="search"] .topbar-actions {
   color: var(--text);
 }
 
+.entry-view-link {
+  color: var(--accent-strong);
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.entry-view-link:hover {
+  text-decoration: underline;
+}
+
 .entry-view-image-button {
   display: block;
   width: 100%;

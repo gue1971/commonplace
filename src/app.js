@@ -1222,7 +1222,7 @@ function renderEntryViewMarkup(entry) {
     renderEntryViewSection("メモ・考え", entry.context_note),
     renderEntryViewSection("位置情報", entry.locator),
     renderEntryViewTags(entry.tags || []),
-    renderEntryViewSection("関連リンク", entry.time_meta?.context_link),
+    renderEntryViewLink("関連リンク", entry.time_meta?.context_link),
   ].filter(Boolean);
 
   return sections.join("");
@@ -1261,6 +1261,20 @@ function renderEntryViewSection(label, value) {
     <section class="entry-view-section">
       <h4>${escapeHtml(label)}</h4>
       <p>${escapeHtml(normalized).replaceAll("\n", "<br />")}</p>
+    </section>
+  `;
+}
+
+function renderEntryViewLink(label, value) {
+  const normalized = normalizeText(value);
+  if (!normalized) {
+    return "";
+  }
+
+  return `
+    <section class="entry-view-section">
+      <h4>${escapeHtml(label)}</h4>
+      <a class="entry-view-link" href="${escapeHtml(normalized)}" target="_blank" rel="noreferrer noopener">${escapeHtml(normalized)}</a>
     </section>
   `;
 }
