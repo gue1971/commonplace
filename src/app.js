@@ -419,7 +419,7 @@ function renderLibraryScreen() {
         );
 
         if (state.libraryView === "list") {
-          const latestEntry = getEntriesForBook(book.id)[0];
+          const latestEntry = getLatestEntryForBook(book.id);
           const listTagsMarkup = (latestEntry?.tags || [])
             .slice(0, 3)
             .map(
@@ -1063,14 +1063,111 @@ function sortBooks(books, mode, direction = "desc") {
 }
 
 function getEntriesForBook(bookId) {
+  return sortEntriesForReading(state.entries.filter((entry) => entry.book_id === bookId));
+}
+
+function getLatestEntryForBook(bookId) {
   return state.entries
     .filter((entry) => entry.book_id === bookId)
-    .sort((left, right) => right.updated_at.localeCompare(left.updated_at));
+    .sort((left, right) => right.updated_at.localeCompare(left.updated_at))[0];
 }
 
 function getBookUpdatedAt(book) {
-  const latestEntry = getEntriesForBook(book.id)[0];
+  const latestEntry = getLatestEntryForBook(book.id);
   return latestEntry?.updated_at || book.updated_at || book.created_at;
+}
+
+function sortEntriesForReading(entries) {
+  return [...entries].sort((left, right) => compareReadingOrder(left, right));
+}
+
+function compareReadingOrder(left, right) {
+  const leftKey = createReadingOrderKey(left);
+  const rightKey = createReadingOrderKey(right);
+  const limit = Math.max(leftKey.length, rightKey.length);
+
+  for (let index = 0; index < limit; index += 1) {
+    const leftValue = leftKey[index] ?? Number.MAX_SAFE_INTEGER;
+    const rightValue = rightKey[index] ?? Number.MAX_SAFE_INTEGER;
+    if (leftValue !== rightValue) {
+      return leftValue - rightValue;
+    }
+  }
+
+  if (left.created_at !== right.created_at) {
+    return left.created_at.localeCompare(right.created_at);
+  }
+
+  return left.id.localeCompare(right.id, "ja");
+}
+
+function createReadingOrderKey(entry) {
+  const locator = normalizeText(entry.locator);
+  if (!locator) {
+    return [Number.MAX_SAFE_INTEGER - 2];
+  }
+
+  const key = [];
+  const chapterMatch = locator.match(/第([0-9]+|[一二三四五六七八九十百〇零]+)(章|部)/);
+  if (chapterMatch) {
+    key.push(toSectionNumber(chapterMatch[1]));
+  }
+
+  const numericMatches = [...locator.matchAll(/([0-9]+)/g)].map((match) => Number(match[1]));
+  if (numericMatches.length) {
+    key.push(...numericMatches);
+  }
+
+  const kindleMatch = locator.match(/location\s*([0-9]+)/i);
+  if (kindleMatch && !numericMatches.length) {
+    key.push(Number(kindleMatch[1]));
+  }
+
+  if (!key.length) {
+    return [Number.MAX_SAFE_INTEGER - 1];
+  }
+
+  return key;
+}
+
+function toSectionNumber(value) {
+  if (/^\d+$/.test(value)) {
+    return Number(value);
+  }
+
+  const digits = {
+    "〇": 0,
+    "零": 0,
+    "一": 1,
+    "二": 2,
+    "三": 3,
+    "四": 4,
+    "五": 5,
+    "六": 6,
+    "七": 7,
+    "八": 8,
+    "九": 9,
+  };
+  let total = 0;
+  let current = 0;
+
+  for (const char of value) {
+    if (char === "十") {
+      total += (current || 1) * 10;
+      current = 0;
+      continue;
+    }
+
+    if (char === "百") {
+      total += (current || 1) * 100;
+      current = 0;
+      continue;
+    }
+
+    current = digits[char] ?? current;
+  }
+
+  return total + current;
 }
 
 function createEmptyEntry(bookId) {
@@ -1113,7 +1210,7 @@ function syncBookUpdatedAt(bookId) {
     return;
   }
 
-  const latestEntry = getEntriesForBook(bookId)[0];
+  const latestEntry = getLatestEntryForBook(bookId);
   bumpBookUpdatedAt(bookId, latestEntry?.updated_at || book.created_at);
 }
 
