@@ -197,6 +197,11 @@
           <input name="locator" type="text" placeholder="章名 / location / 自由記述" />
         </label>
 
+        <label class="field-checkbox">
+          <input name="favorite" type="checkbox" />
+          <span>お気に入り ★</span>
+        </label>
+
         <label class="field">
           <span>関連リンク</span>
           <input name="context_link" type="text" placeholder="関連メモやURL" />
@@ -233,6 +238,7 @@
         <div class="form-actions">
           <button id="close-entry-view-button" class="secondary-button" type="button">閉じる</button>
           <button id="edit-entry-view-button" class="primary-button" type="button">編集</button>
+          <button id="favorite-entry-view-button" class="ghost-button favorite-toggle-button" type="button" aria-pressed="false" aria-label="お気に入りに追加">☆</button>
         </div>
       </div>
     </dialog>
