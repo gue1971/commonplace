@@ -10,6 +10,8 @@ const state = {
   libraryView: "grid",
   bookSearch: "",
   bookSearchDraft: "",
+  bookSort: "reading",
+  bookSortDirection: "asc",
   globalSearch: "",
   globalSearchDraft: "",
 };
@@ -497,11 +499,17 @@ function renderBookScreen(bookId, entryId = null) {
   const fragment = cloneTemplate("book-template");
   const searchForm = fragment.querySelector("#book-subbar-search-form");
   const searchInput = fragment.querySelector("#book-subbar-search-input");
-  const updated = fragment.querySelector("#book-subbar-updated");
+  const sortSelect = fragment.querySelector("#book-sort-select");
+  const sortDirectionButton = fragment.querySelector("#book-sort-direction-button");
   const list = fragment.querySelector("#book-entry-list");
 
   searchInput.value = state.bookSearchDraft;
-  updated.textContent = `${formatDateCompact(getBookUpdatedAt(book))}更新`;
+  sortSelect.value = state.bookSort;
+  sortDirectionButton.textContent = state.bookSortDirection === "desc" ? "↓" : "↑";
+  sortDirectionButton.setAttribute(
+    "aria-label",
+    state.bookSortDirection === "desc" ? "降順で表示中。昇順に切り替え" : "昇順で表示中。降順に切り替え"
+  );
   enableSelectAllOnFocus(searchInput);
 
   searchInput.addEventListener("input", (event) => {
@@ -514,7 +522,19 @@ function renderBookScreen(bookId, entryId = null) {
     renderWithPreservedInput("book-subbar-search-input", state.bookSearchDraft);
   });
 
-  const entries = getEntriesForBook(book.id).filter((entry) => matchesEntry(entry, state.bookSearch));
+  sortSelect.addEventListener("change", (event) => {
+    state.bookSort = event.target.value;
+    render();
+  });
+
+  sortDirectionButton.addEventListener("click", () => {
+    state.bookSortDirection = state.bookSortDirection === "desc" ? "asc" : "desc";
+    render();
+  });
+
+  const entries = getEntriesForBook(book.id, state.bookSort, state.bookSortDirection).filter((entry) =>
+    matchesEntry(entry, state.bookSearch)
+  );
   if (!entries.length) {
     list.innerHTML = `<div class="empty-state">まだEntryがありません。まずは投下してください。</div>`;
   } else {
@@ -1102,8 +1122,12 @@ function sortBooks(books, mode, direction = "desc") {
   return direction === "asc" ? copy : copy.reverse();
 }
 
-function getEntriesForBook(bookId) {
-  return sortEntriesForReading(state.entries.filter((entry) => entry.book_id === bookId));
+function getEntriesForBook(bookId, mode = "reading", direction = "asc") {
+  return sortEntriesForBookDisplay(
+    state.entries.filter((entry) => entry.book_id === bookId),
+    mode,
+    direction
+  );
 }
 
 function getLatestEntryForBook(bookId) {
@@ -1119,6 +1143,23 @@ function getBookUpdatedAt(book) {
 
 function sortEntriesForReading(entries) {
   return [...entries].sort((left, right) => compareReadingOrder(left, right));
+}
+
+function sortEntriesForBookDisplay(entries, mode = "reading", direction = "asc") {
+  const copy = [...entries];
+
+  if (mode === "updated") {
+    copy.sort((left, right) => left.updated_at.localeCompare(right.updated_at));
+    return direction === "asc" ? copy : copy.reverse();
+  }
+
+  if (mode === "created") {
+    copy.sort((left, right) => left.created_at.localeCompare(right.created_at));
+    return direction === "asc" ? copy : copy.reverse();
+  }
+
+  copy.sort((left, right) => compareReadingOrder(left, right));
+  return direction === "asc" ? copy : copy.reverse();
 }
 
 function compareReadingOrder(left, right) {

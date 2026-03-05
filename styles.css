@@ -430,7 +430,7 @@ body[data-screen="search"] .topbar-actions {
 .book-subbar {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
+  align-items: end;
   gap: 18px;
 }
 
@@ -446,14 +446,13 @@ body[data-screen="search"] .topbar-actions {
   padding: 10px 12px;
 }
 
-.book-subbar-updated {
-  display: block;
-  text-align: right;
-  padding: 0 2px 0 0;
-  color: var(--muted);
-  font-size: 0.8rem;
-  line-height: 1.2;
-  white-space: nowrap;
+.book-sort-field {
+  width: 150px;
+}
+
+.book-sort-field select {
+  padding: 10px 12px;
+  font-size: 0.88rem;
 }
 
 .library-grid {
@@ -1320,16 +1319,19 @@ body[data-screen="search"] .topbar-actions {
   body[data-screen="book"] .book-subbar {
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 14px;
-    align-items: center;
-  }
-
-  body[data-screen="book"] .book-subbar-updated {
-    font-size: 0.72rem;
-    text-align: right;
-    padding: 0;
+    align-items: end;
   }
 
   body[data-screen="book"] .book-subbar-search input {
+    padding: 8px 10px;
+    font-size: 0.82rem;
+  }
+
+  body[data-screen="book"] .book-sort-field {
+    width: 128px;
+  }
+
+  body[data-screen="book"] .book-sort-field select {
     padding: 8px 10px;
     font-size: 0.82rem;
   }

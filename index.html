@@ -102,7 +102,19 @@
               <input id="book-subbar-search-input" type="search" aria-label="この本を検索" placeholder="見出し・引用・メモなど" />
             </form>
           </div>
-          <span id="book-subbar-updated" class="book-subbar-updated"></span>
+          <label class="field field-compact book-sort-field">
+            <span class="field-label-row">
+              <span>並び替え</span>
+              <button id="book-sort-direction-button" class="sort-direction-button sort-direction-button-inline" type="button" aria-label="並び順を切り替え">↑</button>
+            </span>
+            <div class="sort-control">
+              <select id="book-sort-select">
+                <option value="reading">読書順</option>
+                <option value="updated">更新日</option>
+                <option value="created">追加日</option>
+              </select>
+            </div>
+          </label>
         </div>
         <div id="book-entry-list" class="entry-list"></div>
       </section>
