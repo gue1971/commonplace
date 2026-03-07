@@ -464,25 +464,23 @@ function renderLibraryScreen() {
       .join("");
 
     grid.innerHTML = bookMarkup;
-    grid.querySelectorAll("[data-book-id]").forEach((button) => {
-      button.addEventListener("click", () => navigateTo({ screen: "book", bookId: button.dataset.bookId }));
-    });
-    grid.querySelectorAll(".library-list-item").forEach((item) => {
-      item.addEventListener("click", (event) => {
-        if (event.target.closest("[data-tag-query]")) {
-          return;
-        }
-        navigateTo({ screen: "book", bookId: item.dataset.bookId });
-      });
-    });
-    grid.querySelectorAll(".library-list-item [data-tag-query]").forEach((button) => {
-      button.addEventListener("click", (event) => {
+    grid.addEventListener("click", (event) => {
+      const tagButton = event.target.closest("[data-tag-query]");
+      if (tagButton) {
         event.stopPropagation();
-        const query = button.dataset.tagQuery || "";
+        const query = tagButton.dataset.tagQuery || "";
         state.globalSearchDraft = query;
         state.globalSearch = query;
         navigateTo({ screen: "search" });
-      });
+        return;
+      }
+
+      const bookNode = event.target.closest("[data-book-id]");
+      if (!bookNode) {
+        return;
+      }
+
+      navigateTo({ screen: "book", bookId: bookNode.dataset.bookId });
     });
   }
 
