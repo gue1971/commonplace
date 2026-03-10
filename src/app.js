@@ -74,6 +74,15 @@ const entryViewState = {
   bookId: null,
   entryId: null,
 };
+const entryViewSwipeState = {
+  active: false,
+  ignore: false,
+  startX: 0,
+  startY: 0,
+  pointerId: null,
+};
+const ENTRY_VIEW_SWIPE_MIN_DISTANCE = 56;
+const ENTRY_VIEW_SWIPE_MAX_VERTICAL = 72;
 
 boot().catch((error) => {
   console.error(error);
@@ -229,6 +238,14 @@ function wireGlobalEvents() {
     event.preventDefault();
     closeEntryViewDialog();
   });
+  entryViewContent.addEventListener("touchstart", handleEntryViewTouchStart, { passive: true });
+  entryViewContent.addEventListener("touchmove", handleEntryViewTouchMove, { passive: true });
+  entryViewContent.addEventListener("touchend", handleEntryViewTouchEnd, { passive: true });
+  entryViewContent.addEventListener("touchcancel", resetEntryViewSwipeState);
+  entryViewContent.addEventListener("pointerdown", handleEntryViewPointerDown);
+  entryViewContent.addEventListener("pointermove", handleEntryViewPointerMove);
+  entryViewContent.addEventListener("pointerup", handleEntryViewPointerUp);
+  entryViewContent.addEventListener("pointercancel", resetEntryViewSwipeState);
   closeEntryImageButton.addEventListener("click", () => closeEntryImageDialog());
   entryImageDialog.addEventListener("cancel", (event) => {
     event.preventDefault();
@@ -783,11 +800,156 @@ function closeEntryViewDialog({ skipNavigation = false } = {}) {
   entryViewContent.innerHTML = "";
   entryViewState.bookId = null;
   entryViewState.entryId = null;
+  resetEntryViewSwipeState();
   syncEntryFavoriteButton(null);
 
   if (!skipNavigation && state.route.screen === "entry" && state.route.bookId) {
     navigateTo({ screen: "book", bookId: state.route.bookId });
   }
+}
+
+function handleEntryViewTouchStart(event) {
+  if (!entryViewDialog.open || entryImageDialog.open) {
+    return;
+  }
+
+  if (!event.touches || event.touches.length !== 1) {
+    resetEntryViewSwipeState();
+    return;
+  }
+
+  const touch = event.touches[0];
+  const target = event.target instanceof Element ? event.target : null;
+  const interactive = target?.closest("button, a, input, textarea, select, label");
+  entryViewSwipeState.active = true;
+  entryViewSwipeState.ignore = Boolean(interactive);
+  entryViewSwipeState.startX = touch.clientX;
+  entryViewSwipeState.startY = touch.clientY;
+}
+
+function handleEntryViewTouchMove(event) {
+  if (!entryViewSwipeState.active || !event.touches || event.touches.length !== 1) {
+    return;
+  }
+
+  const touch = event.touches[0];
+  const deltaX = touch.clientX - entryViewSwipeState.startX;
+  const deltaY = touch.clientY - entryViewSwipeState.startY;
+
+  if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > ENTRY_VIEW_SWIPE_MAX_VERTICAL) {
+    entryViewSwipeState.ignore = true;
+  }
+}
+
+function handleEntryViewTouchEnd(event) {
+  if (!entryViewSwipeState.active || entryViewSwipeState.ignore) {
+    resetEntryViewSwipeState();
+    return;
+  }
+
+  const touch = event.changedTouches?.[0];
+  if (!touch) {
+    resetEntryViewSwipeState();
+    return;
+  }
+
+  const deltaX = touch.clientX - entryViewSwipeState.startX;
+  const deltaY = touch.clientY - entryViewSwipeState.startY;
+  const isHorizontalSwipe =
+    Math.abs(deltaX) >= ENTRY_VIEW_SWIPE_MIN_DISTANCE &&
+    Math.abs(deltaY) <= ENTRY_VIEW_SWIPE_MAX_VERTICAL &&
+    Math.abs(deltaX) > Math.abs(deltaY) * 1.2;
+
+  if (isHorizontalSwipe) {
+    moveEntryViewBySwipe(deltaX < 0 ? 1 : -1);
+  }
+
+  resetEntryViewSwipeState();
+}
+
+function handleEntryViewPointerDown(event) {
+  if (!entryViewDialog.open || entryImageDialog.open) {
+    return;
+  }
+
+  if (event.pointerType !== "touch" && event.pointerType !== "pen") {
+    return;
+  }
+
+  const target = event.target instanceof Element ? event.target : null;
+  const interactive = target?.closest("button, a, input, textarea, select, label");
+  entryViewSwipeState.active = true;
+  entryViewSwipeState.ignore = Boolean(interactive);
+  entryViewSwipeState.startX = event.clientX;
+  entryViewSwipeState.startY = event.clientY;
+  entryViewSwipeState.pointerId = event.pointerId;
+}
+
+function handleEntryViewPointerMove(event) {
+  if (!entryViewSwipeState.active || entryViewSwipeState.pointerId !== event.pointerId) {
+    return;
+  }
+
+  const deltaX = event.clientX - entryViewSwipeState.startX;
+  const deltaY = event.clientY - entryViewSwipeState.startY;
+  if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > ENTRY_VIEW_SWIPE_MAX_VERTICAL) {
+    entryViewSwipeState.ignore = true;
+  }
+}
+
+function handleEntryViewPointerUp(event) {
+  if (!entryViewSwipeState.active || entryViewSwipeState.pointerId !== event.pointerId) {
+    return;
+  }
+
+  if (entryViewSwipeState.ignore) {
+    resetEntryViewSwipeState();
+    return;
+  }
+
+  const deltaX = event.clientX - entryViewSwipeState.startX;
+  const deltaY = event.clientY - entryViewSwipeState.startY;
+  const isHorizontalSwipe =
+    Math.abs(deltaX) >= ENTRY_VIEW_SWIPE_MIN_DISTANCE &&
+    Math.abs(deltaY) <= ENTRY_VIEW_SWIPE_MAX_VERTICAL &&
+    Math.abs(deltaX) > Math.abs(deltaY) * 1.2;
+
+  if (isHorizontalSwipe) {
+    moveEntryViewBySwipe(deltaX < 0 ? 1 : -1);
+  }
+
+  resetEntryViewSwipeState();
+}
+
+function resetEntryViewSwipeState() {
+  entryViewSwipeState.active = false;
+  entryViewSwipeState.ignore = false;
+  entryViewSwipeState.startX = 0;
+  entryViewSwipeState.startY = 0;
+  entryViewSwipeState.pointerId = null;
+}
+
+function moveEntryViewBySwipe(step) {
+  const { bookId, entryId } = entryViewState;
+  if (!bookId || !entryId) {
+    return;
+  }
+
+  const sequence = getEntriesForBook(bookId, state.bookSort, state.bookSortDirection).filter((entry) =>
+    matchesEntry(entry, state.bookSearch)
+  );
+  const currentIndex = sequence.findIndex((entry) => entry.id === entryId);
+  if (currentIndex < 0) {
+    return;
+  }
+
+  const nextIndex = currentIndex + step;
+  if (nextIndex < 0 || nextIndex >= sequence.length) {
+    return;
+  }
+
+  const nextEntry = sequence[nextIndex];
+  navigateTo({ screen: "entry", bookId, entryId: nextEntry.id });
 }
 
 function openEntryImageDialog(imageSrc, title) {

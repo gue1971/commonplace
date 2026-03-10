@@ -901,6 +901,7 @@ body[data-screen="search"] .topbar-actions {
 .entry-view-content {
   display: grid;
   gap: 14px;
+  touch-action: pan-y;
 }
 
 .entry-view-section {
